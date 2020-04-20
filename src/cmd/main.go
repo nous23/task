@@ -14,10 +14,6 @@ func init() {
 	initLog()
 }
 
-func main() {
-	logrus.Infof("task start...")
-}
-
 func initLog() {
 	if !util.Exist(config.AppConfigs.LogPath) {
 		_, err := os.Create(config.AppConfigs.LogPath)
@@ -33,3 +29,9 @@ func initLog() {
 	logrus.SetOutput(logFile)
 	logrus.SetFormatter(&logrus.TextFormatter{})
 }
+
+func main() {
+	logrus.Infof("task start...")
+}
+
+
