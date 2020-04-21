@@ -1,1 +1,8 @@
 log_path: {{.user_home_dir}}\AppData\Local\Task\log\task.log
+db_config:
+  user: root
+  password:
+  protocol: tcp
+  host: 127.0.0.1
+  port: 3306
+  dbname: chendb
