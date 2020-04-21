@@ -1,0 +1,1 @@
+log_path: {{.user_home_dir}}\AppData\Local\Task\log\task.log
