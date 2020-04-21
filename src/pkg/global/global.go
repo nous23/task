@@ -34,5 +34,5 @@ var (
 )
 
 const (
-	AppConfigFile string = "app_config.json"
+	AppConfigFile string = "app_config.yaml"
 )
