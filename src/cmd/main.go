@@ -37,6 +37,5 @@ func initLog() {
 
 func main() {
 	logrus.Infof("task start...")
+	logrus.Infof("%+v", config.AppConfigs)
 }
-
-

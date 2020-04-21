@@ -22,10 +22,10 @@ func init() {
 
 // dirs
 var (
-	CmdDir string
-	SrcDir string
+	CmdDir     string
+	SrcDir     string
 	ProjectDir string
-	ConfDir string
+	ConfDir    string
 )
 
 // file path

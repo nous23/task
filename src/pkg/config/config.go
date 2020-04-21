@@ -9,11 +9,22 @@ import (
 	"text/template"
 
 	"gopkg.in/yaml.v2"
+
 	"task/pkg/global"
 )
 
 type AppConfig struct {
-	LogPath string `yaml:"log_path"`
+	LogPath  string   `yaml:"log_path"`
+	DBConfig dbConfig `yaml:"db_config"`
+}
+
+type dbConfig struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Protocol string `yaml:"protocol"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	DBName   string `yaml:"dbname"`
 }
 
 var AppConfigs AppConfig
