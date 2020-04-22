@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"task/config"
 )
@@ -23,7 +23,7 @@ func InitDB() error {
 	var err error
 	db, err = sql.Open("mysql", dataSourceName)
 	if err != nil {
-		logrus.Errorf("open db failed: %v\n", err)
+		log.Errorf("open db failed: %v\n", err)
 		return err
 	}
 	return db.Ping()

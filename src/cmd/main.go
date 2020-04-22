@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"task/apiserver"
 	"task/config"
@@ -35,31 +34,31 @@ func initLog() {
 	if err != nil {
 		log.Panicf("open log file %s failed: %v", config.AppConfigs.LogPath, err)
 	}
-	formatter := &logrus.TextFormatter{
+	formatter := &log.TextFormatter{
 		PadLevelText: true,
 		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
 			return frame.Function, fmt.Sprintf("%s:%d", frame.File, frame.Line)
 		},
 	}
-	logrus.SetFormatter(formatter)
-	logrus.SetReportCaller(true)
-	logrus.SetOutput(logFile)
+	log.SetFormatter(formatter)
+	log.SetReportCaller(true)
+	log.SetOutput(logFile)
 }
 
 func main() {
-	logrus.Infof("task start...")
-	logrus.Infof("%+v", config.AppConfigs)
+	log.Infof("task start...")
+	log.Infof("%+v", config.AppConfigs)
 
 	var err error
 	err = database.InitDB()
 	if err != nil {
-		logrus.Errorf("init db failed: %v", err)
+		log.Errorf("init db failed: %v", err)
 		os.Exit(1)
 	}
 
 	err = apiserver.Start()
 	if err != nil {
-		logrus.Errorf("start apiserver failed: %v", err)
+		log.Errorf("start apiserver failed: %v", err)
 		os.Exit(1)
 	}
 }

@@ -2,7 +2,7 @@ package apiserver
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"task/apiserver/controller"
 )
@@ -14,7 +14,7 @@ func Start() error {
 
 	err := r.Run()
 	if err != nil {
-		logrus.Errorf("run gin instance failed: %v", err)
+		log.Errorf("run gin instance failed: %v", err)
 		return err
 	}
 
