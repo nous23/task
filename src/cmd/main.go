@@ -9,8 +9,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"task/apiserver"
 	"task/config"
-	"task/model"
+	"task/database"
 	"task/util"
 )
 
@@ -50,9 +51,15 @@ func main() {
 	logrus.Infof("%+v", config.AppConfigs)
 
 	var err error
-	err = model.InitDB()
+	err = database.InitDB()
 	if err != nil {
 		logrus.Errorf("init db failed: %v", err)
+		os.Exit(1)
+	}
+
+	err = apiserver.Start()
+	if err != nil {
+		logrus.Errorf("start apiserver failed: %v", err)
 		os.Exit(1)
 	}
 }
