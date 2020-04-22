@@ -10,7 +10,7 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"task/pkg/global"
+	"task/global"
 )
 
 type AppConfig struct {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"task/pkg/config"
-	"task/pkg/util"
+	"task/config"
+	"task/util"
 )
 
 func init() {
