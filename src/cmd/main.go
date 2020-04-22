@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"task/config"
+	"task/model"
 	"task/util"
 )
 
@@ -38,4 +39,11 @@ func initLog() {
 func main() {
 	logrus.Infof("task start...")
 	logrus.Infof("%+v", config.AppConfigs)
+
+	var err error
+	err = model.InitDB()
+	if err != nil {
+		logrus.Errorf("init db failed: %v", err)
+		os.Exit(1)
+	}
 }
