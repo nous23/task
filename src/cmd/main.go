@@ -46,8 +46,7 @@ func initLog() {
 }
 
 func main() {
-	log.Infof("task start...")
-	log.Infof("%+v", config.AppConfigs)
+	log.Info("========== task start ==========")
 
 	var err error
 	err = database.InitDB()
