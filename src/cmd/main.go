@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/sirupsen/logrus"
 
@@ -32,8 +34,15 @@ func initLog() {
 	if err != nil {
 		log.Panicf("open log file %s failed: %v", config.AppConfigs.LogPath, err)
 	}
+	formatter := &logrus.TextFormatter{
+		PadLevelText: true,
+		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			return frame.Function, fmt.Sprintf("%s:%d", frame.File, frame.Line)
+		},
+	}
+	logrus.SetFormatter(formatter)
+	logrus.SetReportCaller(true)
 	logrus.SetOutput(logFile)
-	logrus.SetFormatter(&logrus.TextFormatter{})
 }
 
 func main() {
