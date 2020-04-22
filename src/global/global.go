@@ -16,8 +16,10 @@ func init() {
 	SrcDir = filepath.Dir(CmdDir)
 	ProjectDir = filepath.Dir(SrcDir)
 	ConfDir = filepath.Join(ProjectDir, "conf")
+	StaticDir = filepath.Join(SrcDir, "apiserver", "static")
 
 	AppConfigPath = filepath.Join(ConfDir, AppConfigFile)
+	TaskHTMLPath = filepath.Join(StaticDir, TaskHTMLFile)
 }
 
 // dirs
@@ -26,13 +28,16 @@ var (
 	SrcDir     string
 	ProjectDir string
 	ConfDir    string
+	StaticDir  string
 )
 
 // file path
 var (
 	AppConfigPath string
+	TaskHTMLPath  string
 )
 
 const (
 	AppConfigFile string = "app_config.yaml"
+	TaskHTMLFile  string = "task.html"
 )

@@ -3,6 +3,7 @@ package apiserver
 import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"task/global"
 	"time"
 
 	"task/apiserver/controller"
@@ -28,7 +29,11 @@ func Start() error {
 	r.Use(logger)
 	r.Use(gin.Recovery())
 
+
+	r.LoadHTMLFiles(global.TaskHTMLPath)
+
 	r.GET("/", controller.Hello)
+	r.GET("/task", controller.TaskHome)
 
 	err := r.Run()
 	if err != nil {
