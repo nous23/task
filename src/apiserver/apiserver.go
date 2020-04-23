@@ -6,36 +6,36 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
-	"task/global"
-
 	"task/apiserver/controller"
+	"task/global"
 )
 
 func logger(c *gin.Context) {
 	start := time.Now()
 	c.Next()
 
-	e := log.WithFields(map[string]interface{}{
-		"latency": time.Now().Sub(start),
+	e := log.WithFields(log.Fields{
+		"latency":   time.Now().Sub(start),
 		"client_ip": c.ClientIP(),
-		"method": c.Request.Method,
-		"path": c.Request.URL.Path,
-		"errors": c.Errors.ByType(gin.ErrorTypePrivate).String(),
+		"method":    c.Request.Method,
+		"path":      c.Request.URL.Path,
+		"errors":    c.Errors.ByType(gin.ErrorTypePrivate).String(),
 	})
 
 	e.Info()
 }
 
-func Start() error {
+func Run() error {
 	r := gin.New()
 	r.Use(logger)
 	r.Use(gin.Recovery())
 
-
 	r.LoadHTMLFiles(global.TaskHTMLPath)
+	r.Static("/static", global.StaticDir)
 
 	r.GET("/", controller.Hello)
 	r.GET("/task", controller.TaskHome)
+	r.GET("/tasks", controller.ListTask)
 
 	err := r.Run()
 	if err != nil {
