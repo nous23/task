@@ -3,8 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <title>Task</title>
+    <link rel="stylesheet" href="static/task.css" />
+    <link rel="stylesheet" href="static/fontawesome/css/all.css" />
+    <link rel="stylesheet" href="static/fontawesome/css/v4-shims.css" />
+    <script type="text/javascript" async src="static/task.js"></script>
 </head>
 <body>
-
+    <div class="top">
+        <div class="logo">
+            <a href="http://127.0.0.1:8080/task">TASKS</a>
+        </div>
+        <div class="search">
+            <label for="search-box"></label>
+            <input class="search-box" type="search" id="search-box">
+            <button class="search-button fa fa-search"></button>
+        </div>
+        <div class="navigator"></div>
+    </div>
+    <div class="main">
+        <div class="left-bar">
+            <div class="left-bar-option active">
+                <div class="left-bar-option-icon fa fa-tasks"></div>
+                <div class="left-bar-option-text">任务</div>
+            </div>
+            <div class="left-bar-option">
+                <div class="left-bar-option-icon one-day fa fa-calendar-day"></div>
+                <div class="left-bar-option-text">今天</div>
+            </div>
+            <div class="left-bar-option">
+                <div class="left-bar-option-icon one-week fa fa-calendar-week"></div>
+                <div class="left-bar-option-text">本周</div>
+            </div>
+        </div>
+        <div class="tasks" id="tasks">
+            <div class="list" id="list">
+                <div class="task-top">
+                    <div class="task-top-name" id="task-top-name">任务</div>
+                </div>
+                <div id="create-task">
+                    <div class="create-task-icon fa fa-plus"></div>
+                    <input type="text" id="create-task-edit" placeholder="添加任务">
+                    <label for="create-task-edit"></label>
+                </div>
+            </div>
+            <div class="right-bar not-show" id="right-bar">
+                <div class="detail">
+                    <div class="detail-item no-margin-bottom">
+                        <div class="detail-item-icon-wrapper">
+                            <div class="complete">
+                                <input type="checkbox" class="not-show" id="task-complete">
+                                <label aria-hidden="true" for="task-complete"></label>
+                            </div>
+                        </div>
+                        <textarea class="edit" id="title-edit" rows="1"></textarea>
+                        <label for="title-edit"></label>
+                    </div>
+                    <div class="sub-tasks">
+                        <div class="detail-item">
+                            <div class="complete">
+                                <input type="checkbox" class="not-show" id="sub-task-complete">
+                                <label aria-hidden="true" for="sub-task-complete"></label>
+                            </div>
+                            <textarea class="edit sub-task-edit" id="sub-task-edit" rows="1"></textarea>
+                            <label for="sub-task-edit"></label>
+                        </div>
+                    </div>
+                    <div class="detail-item no-margin-bottom split-title-and-content"></div>
+                    <div class="detail-item">
+                        <label>
+                            <textarea class="edit" id="content-edit"></textarea>
+                        </label>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-item-icon fa fa-plus-square"></div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-item-icon fa fa-list-alt"></div>
+                        <label><input type="text" id="task-type"></label>
+                    </div>
+                    <div class="detail-item deadline" id="deadline">
+                        <div class="detail-item-icon fa fa-calendar-check"></div>
+                        <label><span>截止于</span><input class="input-date" type="datetime-local" id="input-date"></label>
+                    </div>
+                </div>
+                <div class="detail-footer">
+                    <div class="detail-footer-icon hide fa fa-eye-slash" id="hide"></div>
+                    <div id="describe"></div>
+                    <div class="detail-footer-icon delete-task fa fa-trash" id="delete"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom"></div>
 </body>
 </html>
