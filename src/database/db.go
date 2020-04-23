@@ -28,3 +28,8 @@ func InitDB() error {
 	}
 	return db.Ping()
 }
+
+// return database handler
+func Get() *sql.DB {
+	return db
+}
