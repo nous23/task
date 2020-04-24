@@ -41,4 +41,5 @@ func initLog() {
 	log.SetFormatter(formatter)
 	log.SetReportCaller(true)
 	log.SetOutput(logFile)
+	log.SetLevel(log.TraceLevel)
 }
