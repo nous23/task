@@ -36,6 +36,9 @@ func Run() error {
 	r.GET("/", controller.Hello)
 	r.GET("/task", controller.TaskHome)
 	r.GET("/tasks", controller.ListTask)
+	r.GET("/task/:id", controller.GetTask)
+	r.PUT("/task/:id", controller.UpdateTask)
+	r.DELETE("/task/:id", controller.DeleteTask)
 
 	err := r.Run()
 	if err != nil {
