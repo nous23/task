@@ -17,7 +17,7 @@ func Hello(c *gin.Context) {
 	c.String(http.StatusOK, "hello")
 }
 
-func TaskHome(c *gin.Context) {
+func Task(c *gin.Context) {
 	c.HTML(http.StatusOK, global.TaskHTMLFile, nil)
 }
 
@@ -77,4 +77,64 @@ func DeleteTask(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+func CreateTask(c *gin.Context) {
+	b, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Errorf("read request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	p := make(map[string]interface{})
+	err = json.Unmarshal(b, &p)
+	if err != nil {
+		log.Errorf("unmarshal create task request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	err = model.CreateTask(p)
+	if err != nil {
+		log.Errorf("create task in db failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.Status(http.StatusCreated)
+}
+
+func CreateSubTask(c *gin.Context) {
+	b, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Errorf("read create subtask request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	p := make(map[string]interface{})
+	err = json.Unmarshal(b, &p)
+	if err != nil {
+		log.Errorf("unmarshal create subtask request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	err = model.CreateSubTask(p)
+	if err != nil {
+		log.Errorf("create subtask in db failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.Status(http.StatusCreated)
+}
+
+func ListSubTask(c *gin.Context) {
+	taskId := c.Param("task_id")
+	subTasks, err := model.ListSubTask(taskId)
+	if err != nil {
+		log.Errorf("list sub task failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, subTasks)
 }
