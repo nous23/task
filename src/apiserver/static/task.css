@@ -206,11 +206,7 @@ textarea {
     padding: 0 10px 0 0;
 }
 
-.sub-task-edit {
-    font-size: x-small;
-}
-
-#sub-task-edit {
+.sub-task-edit, #create-sub-task {
     font-family: 微软雅黑 sans-serif;
     font-size: small;
     max-height: 200px;
@@ -247,8 +243,13 @@ textarea {
 }
 
 .detail-item-icon {
-    padding: 10px;
     color: #1f77b4;
+    height: 36px;
+    width: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .input-date {
@@ -337,4 +338,32 @@ textarea {
 
 .no-margin-bottom {
     margin-bottom: 0;
+}
+
+.complete {
+    width: 36px;
+    height: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.title-item {
+    padding-bottom: 10px;
+}
+
+.sub-task-item {
+    padding-bottom: 5px;
+}
+
+.del-sub-task {
+    color: grey;
+    height: 100%;
+    padding-right: 10px;
+    font-weight: lighter;
+}
+
+.del-sub-task i {
+    cursor: pointer;
 }
