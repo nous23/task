@@ -180,7 +180,9 @@ function updateTaskTitleOnPage(id, title) {
 
 function showRightBar(task) {
     let titleEdit = document.getElementById("title-edit");
-    titleEdit.value = task.title;
+    if (titleEdit != null) {
+        titleEdit.value = task.title;
+    }
 
     let contentEdit = document.getElementById("content-edit");
     contentEdit.value = task.detail;
@@ -207,6 +209,12 @@ function showRightBar(task) {
 
     let rightBar = document.getElementById("right-bar");
     rightBar.setAttribute("data-taskid", task.id);
+
+
+    listSubTask(task.id);
+    let cst = document.getElementById("create-sub-task");
+    cst.value = "";
+
     rightBar.classList.remove("not-show");
 
     let ess = document.getElementsByClassName("edit");
@@ -217,13 +225,56 @@ function showRightBar(task) {
     }
 }
 
+function listSubTask(task_id) {
+    let x = new XMLHttpRequest();
+    x.onreadystatechange = function () {
+        if (x.readyState === 4 && x.status === 200) {
+            console.log("list sub task success");
+            let subTasks = JSON.parse(x.responseText);
+            showSubTaskOnPage(subTasks);
+        }
+    };
+    x.open("GET", "/sub_task/" + task_id);
+    x.send();
+}
+
+function showSubTaskOnPage(subTasks) {
+    console.log("show sub tasks: " + subTasks);
+    let stElement = document.getElementById("sub_tasks");
+    stElement.innerHTML = '';
+    if (subTasks == null) {
+        return
+    }
+    for (let i = 0; i < subTasks.length; i++) {
+        let st = newSubTaskItemElement(subTasks[i]);
+        stElement.appendChild(st)
+    }
+    autoResize(stElement);
+}
+
+function createSubTask(sub_task) {
+    console.log("create sub task" + JSON.stringify(sub_task));
+    let x = new XMLHttpRequest();
+    x.onreadystatechange = function () {
+        if (x.readyState === 4 && x.status === 201) {
+            console.log("create sub task success");
+            listSubTask(sub_task.task_id);
+            clearCreateSubTask();
+        }
+    };
+    x.open("POST", "/sub_task");
+    x.send(JSON.stringify(sub_task));
+}
+
 function rightBarEvent() {
     let titleEdit = document.getElementById("title-edit");
-    titleEdit.addEventListener("change", function () {
-        let rightBar = document.getElementById("right-bar");
-        let taskid = rightBar.getAttribute("data-taskid");
-        updateTask(taskid, {title: this.value});
-    });
+    if (titleEdit != null) {
+        titleEdit.addEventListener("change", function () {
+            let rightBar = document.getElementById("right-bar");
+            let taskid = rightBar.getAttribute("data-taskid");
+            updateTask(taskid, {title: this.value});
+        });
+    }
 
     let contentEdit = document.getElementById("content-edit");
     contentEdit.addEventListener("change", function () {
@@ -263,20 +314,23 @@ function rightBarEvent() {
         rightBar.classList.add("not-show");
     });
 
-    autoResize()
+    let cst = document.getElementById("create-sub-task");
+    cst.addEventListener("change", function () {
+        let rightBar = document.getElementById("right-bar");
+        let taskid = rightBar.getAttribute("data-taskid");
+        createSubTask({task_id: taskid, title: this.value})
+    })
+
+    autoResize(document.getElementById("right-bar"));
 }
 
 
 
-function autoResize() {
-    let es = document.getElementsByClassName("edit");
+function autoResize(root) {
+    let es = root.getElementsByClassName("edit");
     for (let i = 0; i < es.length; i++) {
         let e = es[i];
         e.addEventListener('input', function () {
-            this.style.height = "auto";
-            this.style.height = e.scrollHeight + 'px';
-        });
-        e.addEventListener('load', function () {
             this.style.height = "auto";
             this.style.height = e.scrollHeight + 'px';
         });
