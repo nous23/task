@@ -34,11 +34,16 @@ func Run() error {
 	r.Static("/static", global.StaticDir)
 
 	r.GET("/", controller.Hello)
-	r.GET("/task", controller.TaskHome)
+
+	r.GET("/task", controller.Task)
 	r.GET("/tasks", controller.ListTask)
 	r.GET("/task/:id", controller.GetTask)
 	r.PUT("/task/:id", controller.UpdateTask)
 	r.DELETE("/task/:id", controller.DeleteTask)
+	r.POST("/task", controller.CreateTask)
+
+	r.POST("/sub_task", controller.CreateSubTask)
+	r.GET("/sub_task/:task_id", controller.ListSubTask)
 
 	err := r.Run()
 	if err != nil {
