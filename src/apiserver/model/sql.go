@@ -14,6 +14,9 @@ func init() {
 		sqlBuilderGetTask:    newSqlBuilder(sqlBuilderGetTask),
 		sqlBuilderUpdateTask: newSqlBuilder(sqlBuilderUpdateTask),
 		sqlBuilderDeleteTask: newSqlBuilder(sqlBuilderDeleteTask),
+		sqlBuilderCreateTask: newSqlBuilder(sqlBuilderCreateTask),
+		sqlBuilderCreateSubTask: newSqlBuilder(sqlBuilderCreateSubTask),
+		sqlBuilderListSubTask: newSqlBuilder(sqlBuilderListSubTask),
 	}
 }
 
@@ -56,12 +59,15 @@ const (
 	sqlBuilderGetTask
 	sqlBuilderUpdateTask
 	sqlBuilderDeleteTask
+	sqlBuilderCreateTask
+	sqlBuilderCreateSubTask
+	sqlBuilderListSubTask
 )
 
 const (
-	sqlTmplListTask   = `select * from tasks;`
-	sqlTmplGetTask    = `select * from tasks where id={{.id}};`
-	sqlTmplUpdateTask = `update tasks set
+	sqlTmplListTask   = `select * from task;`
+	sqlTmplGetTask    = `select * from task where id={{.id}};`
+	sqlTmplUpdateTask = `update task set
 {{ if hasKey . "title" }}
 title = '{{.title}},'
 {{ end }}
@@ -84,7 +90,11 @@ end_time = '{{.end_time}}',
 deadline = '{{.deadline}}',
 {{end}}
 where id = {{.id}};`
-	sqlTmplDeleteTask = `delete from tasks where id={{.id}};`
+	sqlTmplDeleteTask = `delete from task where id={{.id}};`
+	sqlTmplCreateTask = `insert into task (completed, title, task_type, detail, start_time, deadline) values
+({{.completed}}, '{{.title}}', '{{.type}}', '{{.detail}}', '{{.start_time}}', '{{.deadline}}');`
+	sqlTmplCreateSubTask = `insert into subtask (task_id, title) values ({{.task_id}}, '{{.title}}');`
+	sqlTmplListSubTask = `select * from subtask where task_id={{.task_id}} order by id;`
 )
 
 var sqlBuilders map[sqlBuilderEnum]*sqlBuilder
@@ -104,6 +114,12 @@ func newSqlBuilder(be sqlBuilderEnum) *sqlBuilder {
 		}
 	case sqlBuilderDeleteTask:
 		tmpl = sqlTmplDeleteTask
+	case sqlBuilderCreateTask:
+		tmpl = sqlTmplCreateTask
+	case sqlBuilderCreateSubTask:
+		tmpl = sqlTmplCreateSubTask
+	case sqlBuilderListSubTask:
+		tmpl = sqlTmplListSubTask
 	default:
 		return nil
 	}
@@ -113,8 +129,8 @@ func newSqlBuilder(be sqlBuilderEnum) *sqlBuilder {
 	}
 }
 
-func buildSql(sbe sqlBuilderEnum, p params) (string, error) {
-	sb, ok := sqlBuilders[sbe]
+func buildSql(e sqlBuilderEnum, p params) (string, error) {
+	sb, ok := sqlBuilders[e]
 	if !ok {
 		return "", fmt.Errorf(errorSqlBuilderNotFound)
 	}
