@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="static/fontawesome/css/all.css" />
     <link rel="stylesheet" href="static/fontawesome/css/v4-shims.css" />
     <script type="text/javascript" async src="static/task.js"></script>
+    <script type="text/javascript" async src="static/util.js"></script>
 </head>
 <body>
     <div class="top">
         <div class="logo">
-            <a href="http://127.0.0.1:8080/task">TASKS</a>
+            <a href="http://127.0.0.1:8080/task">TASK</a>
         </div>
         <div class="search">
             <label for="search-box"></label>
@@ -48,41 +49,41 @@
             </div>
             <div class="right-bar not-show" id="right-bar">
                 <div class="detail">
-                    <div class="detail-item no-margin-bottom">
-                        <div class="detail-item-icon-wrapper">
-                            <div class="complete">
-                                <input type="checkbox" class="not-show" id="task-complete">
-                                <label aria-hidden="true" for="task-complete"></label>
-                            </div>
+                    <div class="detail-item no-margin-bottom title-item">
+                        <div class="complete">
+                            <input type="checkbox" class="not-show" id="task-complete">
+                            <label aria-hidden="true" for="task-complete"></label>
                         </div>
                         <textarea class="edit" id="title-edit" rows="1"></textarea>
                         <label for="title-edit"></label>
                     </div>
-                    <div class="sub-tasks">
-                        <div class="detail-item">
+                    <div class="sub-tasks" id="sub_tasks">
+                        <div class="detail-item no-margin-bottom sub-task-item">
                             <div class="complete">
                                 <input type="checkbox" class="not-show" id="sub-task-complete">
                                 <label aria-hidden="true" for="sub-task-complete"></label>
                             </div>
-                            <textarea class="edit sub-task-edit" id="sub-task-edit" rows="1"></textarea>
-                            <label for="sub-task-edit"></label>
+                            <textarea class="edit sub-task-edit" id="sub-task-edit-1" rows="1"></textarea>
+                            <label for="sub-task-edit-1"></label>
+                            <div><i class="fa fa-times"></i></div>
                         </div>
                     </div>
-                    <div class="detail-item no-margin-bottom split-title-and-content"></div>
+                    <div class="detail-item">
+                        <div class="detail-item-icon"><i class="fa fa-plus"></i></div>
+                        <textarea class="edit" id="create-sub-task" rows="1" placeholder="添加子任务"></textarea>
+                        <label for="create-sub-task"></label>
+                    </div>
                     <div class="detail-item">
                         <label>
                             <textarea class="edit" id="content-edit"></textarea>
                         </label>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-item-icon fa fa-plus-square"></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-item-icon fa fa-list-alt"></div>
+                        <div class="detail-item-icon"><i class="fa fa-list-alt"></i></div>
                         <label><input type="text" id="task-type"></label>
                     </div>
                     <div class="detail-item deadline" id="deadline">
-                        <div class="detail-item-icon fa fa-calendar-check"></div>
+                        <div class="detail-item-icon"><i class="fa fa-calendar-check"></i></div>
                         <label><span>截止于</span><input class="input-date" type="datetime-local" id="input-date"></label>
                     </div>
                 </div>
