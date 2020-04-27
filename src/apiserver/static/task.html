@@ -6,8 +6,6 @@
     <link rel="stylesheet" href="static/task.css" />
     <link rel="stylesheet" href="static/fontawesome/css/all.css" />
     <link rel="stylesheet" href="static/fontawesome/css/v4-shims.css" />
-    <script type="text/javascript" async src="static/task.js"></script>
-    <script type="text/javascript" async src="static/util.js"></script>
 </head>
 <body>
     <div class="top">
@@ -74,9 +72,8 @@
                         <label for="create-sub-task"></label>
                     </div>
                     <div class="detail-item">
-                        <label>
-                            <textarea class="edit" id="content-edit"></textarea>
-                        </label>
+                        <textarea class="edit" id="content-edit"></textarea>
+                        <label for="content-edit"></label>
                     </div>
                     <div class="detail-item">
                         <div class="detail-item-icon"><i class="fa fa-list-alt"></i></div>
@@ -97,4 +94,7 @@
     </div>
     <div class="bottom"></div>
 </body>
+<script type="text/javascript" src="static/util.js"></script>
+<script type="text/javascript" src="static/apiserver.js"></script>
+<script type="text/javascript" src="static/task.js"></script>
 </html>
