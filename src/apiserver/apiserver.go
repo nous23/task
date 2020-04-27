@@ -35,6 +35,7 @@ func Run() error {
 
 	r.GET("/", controller.Hello)
 
+	// task
 	r.GET("/task", controller.Task)
 	r.GET("/tasks", controller.ListTask)
 	r.GET("/task/:id", controller.GetTask)
@@ -42,8 +43,10 @@ func Run() error {
 	r.DELETE("/task/:id", controller.DeleteTask)
 	r.POST("/task", controller.CreateTask)
 
+	// sub task
 	r.POST("/sub_task", controller.CreateSubTask)
 	r.GET("/sub_task/:task_id", controller.ListSubTask)
+	r.DELETE("/sub_task/:id", controller.DeleteSubTask)
 
 	err := r.Run()
 	if err != nil {
