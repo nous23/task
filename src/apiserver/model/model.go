@@ -19,7 +19,7 @@ type Task struct {
 
 func ListTask() ([]*Task, error) {
 	log.Trace("start list task")
-	sqlCmd, err := buildSql(sqlBuilderListTask, nil)
+	sqlCmd, err := buildSql(listTask, nil)
 	if err != nil {
 		log.Errorf("build list task sql failed: %v", err)
 		return nil, err
@@ -42,9 +42,9 @@ func ListTask() ([]*Task, error) {
 	return tasks, nil
 }
 
-func GetTask(id string) (*Task, error) {
+func GetTask(id string) ([]*Task, error) {
 	log.Tracef("start get task %s", id)
-	sqlCmd, err := buildSql(sqlBuilderGetTask, params{"id": id})
+	sqlCmd, err := buildSql(getTask, params{"id": id})
 	if err != nil {
 		log.Errorf("build get task sql failed: %v", err)
 		return nil, err
@@ -54,20 +54,22 @@ func GetTask(id string) (*Task, error) {
 		log.Errorf("exec sql %s failed: %v", sqlCmd, err)
 		return nil, err
 	}
-	t := &Task{}
+	var ts []*Task
 	for rows.Next() {
+		t := &Task{}
 		err = rows.Scan(&t.Id, &t.Completed, &t.Title, &t.Type, &t.Detail, &t.StartTime, &t.EndTime, &t.Deadline)
 		if err != nil {
 			log.Errorf("scan query results failed: %v", err)
 			return nil, err
 		}
+		ts = append(ts, t)
 	}
-	return t, nil
+	return ts, nil
 }
 
 func UpdateTask(value map[string]interface{}) error {
 	log.Tracef("start update task with value: %v", value)
-	sqlCmd, err := buildSql(sqlBuilderUpdateTask, value)
+	sqlCmd, err := buildSql(updateTask, value)
 	if err != nil {
 		log.Errorf("build sql for update task failed: %v", err)
 		return err
@@ -82,7 +84,7 @@ func UpdateTask(value map[string]interface{}) error {
 
 func DeleteTask(id string) error {
 	log.Tracef("start delete task %s", id)
-	sqlCmd, err := buildSql(sqlBuilderDeleteTask, params{"id": id})
+	sqlCmd, err := buildSql(deleteTask, params{"id": id})
 	if err != nil {
 		log.Errorf("build sql for delete task failed: %v", err)
 		return err
@@ -97,7 +99,7 @@ func DeleteTask(id string) error {
 
 func CreateTask(p params) error {
 	log.Tracef("start create task: %v", p)
-	sqlCmd, err := buildSql(sqlBuilderCreateTask, p)
+	sqlCmd, err := buildSql(createTask, p)
 	if err != nil {
 		log.Errorf("build sql for delete task failed: %v", err)
 		return err
@@ -112,7 +114,7 @@ func CreateTask(p params) error {
 
 func CreateSubTask(p params) error {
 	log.Tracef("start create sub task: %v", p)
-	sqlCmd, err := buildSql(sqlBuilderCreateSubTask, p)
+	sqlCmd, err := buildSql(createSubTask, p)
 	if err != nil {
 		log.Errorf("build sql for create sub task failed: %v", err)
 		return err
@@ -126,14 +128,15 @@ func CreateSubTask(p params) error {
 }
 
 type SubTask struct {
-	Id     int    `json:"id"`
-	TaskId int    `json:"task_id"`
-	Title  string `json:"title"`
+	Id        int    `json:"id"`
+	TaskId    int    `json:"task_id"`
+	Title     string `json:"title"`
+	Completed bool   `json:"completed"`
 }
 
 func ListSubTask(taskId string) ([]*SubTask, error) {
 	log.Trace("start list sub task")
-	sqlCmd, err := buildSql(sqlBuilderListSubTask, params{"task_id": taskId})
+	sqlCmd, err := buildSql(listSubTask, params{"task_id": taskId})
 	if err != nil {
 		log.Errorf("build list sub task sql failed: %v", err)
 		return nil, err
@@ -146,7 +149,7 @@ func ListSubTask(taskId string) ([]*SubTask, error) {
 	var subTasks []*SubTask
 	for rows.Next() {
 		st := &SubTask{}
-		err = rows.Scan(&st.Id, &st.TaskId, &st.Title)
+		err = rows.Scan(&st.Id, &st.TaskId, &st.Title, &st.Completed)
 		if err != nil {
 			log.Errorf("scan list sub task query results failed: %v", err)
 			return nil, err
@@ -154,4 +157,20 @@ func ListSubTask(taskId string) ([]*SubTask, error) {
 		subTasks = append(subTasks, st)
 	}
 	return subTasks, nil
+}
+
+func DeleteSubTask(id string) error {
+	log.Tracef("start delete sub task %s", id)
+	sqlCmd, err := buildSql(deleteSubTask, params{"id": id})
+	if err != nil {
+		log.Errorf("build sql for delete sub task failed: %v", err)
+		return err
+	}
+	_, err = database.Get().Exec(sqlCmd)
+	if err != nil {
+		log.Errorf("exec sql [%s] failed: %v", sqlCmd, err)
+		return err
+	}
+	log.Tracef("exec [%s] success", sqlCmd)
+	return nil
 }
