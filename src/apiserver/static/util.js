@@ -18,7 +18,6 @@ function newCompleteElement(id) {
 }
 
 function newSubTaskItemElement(subTask) {
-    console.log(subTask);
     let id = subTask.id;
     let c = newCompleteElement(id);
     let text = document.createElement("textarea");
@@ -30,7 +29,11 @@ function newSubTaskItemElement(subTask) {
     let label = document.createElement("label");
     label.setAttribute("for", id);
     let delIcon = document.createElement("i");
-    delIcon.classList.add("fa", "fa-times");
+    delIcon.classList.add("del-sub-task-icon", "fa", "fa-times");
+    delIcon.addEventListener("click", function () {
+        DoRequest(DELETE, `/sub_task/${subTask.id}`, null, false, verifyStatus);
+        DoRequest(GET, `/sub_task/${subTask.task_id}`, null, true, callbackShowSubTaskOnPage);
+    });
     let del = document.createElement("div");
     del.classList.add("del-sub-task");
     del.appendChild(delIcon);
