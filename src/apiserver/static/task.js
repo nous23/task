@@ -42,8 +42,7 @@ function taskListEvent() {
             }
             this.classList.add(LeftBarOptionActive);
             let id = this.id.split("-")[1];
-            console.log("you are fucking clicking task " + id);
-            showDetail(id);
+            DoRequest("get", "/task/" + id, null, true, callbackShowRightBar);
         });
 
         e.addEventListener("mouseover", function () {
@@ -57,33 +56,25 @@ function taskListEvent() {
         let input = document.getElementById(completeId);
         let taskid = e.id.split("-")[1];
         input.addEventListener("change", function () {
+            let update;
             if (input.checked) {
                 let utc = new Date();
                 let local = new Date(utc.getTime() - timezoneOffset).toISOString();
-                updateTask(taskid, {completed: "1", end_time: local.split(".")[0]});
+                update = {completed: "1", end_time: local.split(".")[0]};
             } else {
-                updateTask(taskid, {completed: "0"});
+                update = {completed: "0"};
             }
+            DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
         });
     }
 }
 
-
-function showTaskList() {
-    let x = new XMLHttpRequest();
-    x.onreadystatechange = function () {
-        if (x.readyState === 4 && x.status === 200) {
-            console.log("query tasks success");
-            console.log(x.responseText);
-            let tasks = JSON.parse(x.responseText);
-            createTaskList(tasks);
-        }
-    };
-    x.open("GET", "/tasks", true);
-    x.send();
-}
-
-function createTaskList(tasks) {
+function callbackCreateTaskList() {
+    if (this.status !== 200) {
+        console.error(`create task failed: ${this.responseText}`)
+        return
+    }
+    let tasks = JSON.parse(this.responseText);
     let taskList = document.createElement("div");
     taskList.classList.add("task-list");
     taskList.id = "task-list";
@@ -134,37 +125,6 @@ function createTaskList(tasks) {
     taskListEvent();
 }
 
-
-
-
-function showDetail(id) {
-    let xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-            console.log(xmlHttp.responseText);
-            let task = JSON.parse(xmlHttp.responseText);
-            showRightBar(task);
-        }
-    };
-    xmlHttp.open("GET", "/task/" + id, true); // false for synchronous request
-    xmlHttp.send(null);
-}
-
-function updateTask(id, update) {
-    console.log("update task " + id);
-    console.log(update);
-    let xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-            if (update.hasOwnProperty("title")) {
-                updateTaskTitleOnPage(id, update.title);
-            }
-        }
-    };
-    xmlHttp.open("put", "/task/" + id, true);
-    xmlHttp.send(JSON.stringify(update));
-}
-
 function updateTaskTitleOnPage(id, title) {
     let task = document.getElementById("taskid-" + id);
     if (task == null) {
@@ -176,9 +136,12 @@ function updateTaskTitleOnPage(id, title) {
     }
 }
 
-
-
-function showRightBar(task) {
+function callbackShowRightBar() {
+    if (this.status !== 200) {
+        console.error("get task failed: " + this.responseText);
+        return;
+    }
+    let task = JSON.parse(this.responseText);
     let titleEdit = document.getElementById("title-edit");
     if (titleEdit != null) {
         titleEdit.value = task.title;
@@ -210,8 +173,7 @@ function showRightBar(task) {
     let rightBar = document.getElementById("right-bar");
     rightBar.setAttribute("data-taskid", task.id);
 
-
-    listSubTask(task.id);
+    DoRequest(GET, `/sub_task/${task.id}`, null, true, callbackShowSubTaskOnPage);
     let cst = document.getElementById("create-sub-task");
     cst.value = "";
 
@@ -225,21 +187,12 @@ function showRightBar(task) {
     }
 }
 
-function listSubTask(task_id) {
-    let x = new XMLHttpRequest();
-    x.onreadystatechange = function () {
-        if (x.readyState === 4 && x.status === 200) {
-            console.log("list sub task success");
-            let subTasks = JSON.parse(x.responseText);
-            showSubTaskOnPage(subTasks);
-        }
-    };
-    x.open("GET", "/sub_task/" + task_id);
-    x.send();
-}
-
-function showSubTaskOnPage(subTasks) {
-    console.log("show sub tasks: " + subTasks);
+function callbackShowSubTaskOnPage() {
+    if (this.status !== 200) {
+        console.error(`list sub task failed: ${this.responseText}`);
+        return;
+    }
+    let subTasks = JSON.parse(this.responseText);
     let stElement = document.getElementById("sub_tasks");
     stElement.innerHTML = '';
     if (subTasks == null) {
@@ -252,50 +205,39 @@ function showSubTaskOnPage(subTasks) {
     autoResize(stElement);
 }
 
-function createSubTask(sub_task) {
-    console.log("create sub task" + JSON.stringify(sub_task));
-    let x = new XMLHttpRequest();
-    x.onreadystatechange = function () {
-        if (x.readyState === 4 && x.status === 201) {
-            console.log("create sub task success");
-            listSubTask(sub_task.task_id);
-            clearCreateSubTask();
-        }
-    };
-    x.open("POST", "/sub_task");
-    x.send(JSON.stringify(sub_task));
-}
-
 function rightBarEvent() {
     let titleEdit = document.getElementById("title-edit");
     if (titleEdit != null) {
         titleEdit.addEventListener("change", function () {
             let rightBar = document.getElementById("right-bar");
             let taskid = rightBar.getAttribute("data-taskid");
-            updateTask(taskid, {title: this.value});
+            let update = {title: this.value};
+            DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
         });
     }
 
     let contentEdit = document.getElementById("content-edit");
     contentEdit.addEventListener("change", function () {
-        console.log("you are fucking changing content");
         let rightBar = document.getElementById("right-bar");
         let taskid = rightBar.getAttribute("data-taskid");
-        updateTask(taskid, {detail: this.value});
+        let update = {detail: this.value};
+        DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
     });
 
     let deadline = document.getElementById("input-date");
     deadline.addEventListener("change", function () {
         let rightBar = document.getElementById("right-bar");
         let taskid = rightBar.getAttribute("data-taskid");
-        updateTask(taskid, {deadline: this.value})
+        let update = {deadline: this.value};
+        DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
     });
 
     let taskTypeEdit = document.getElementById("task-type");
     taskTypeEdit.addEventListener("change", function () {
         let rightBar = document.getElementById("right-bar");
         let taskid = rightBar.getAttribute("data-taskid");
-        updateTask(taskid, {type: this.value})
+        let update = {type: this.value};
+        DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
     });
 
     let footerIcons = document.getElementsByClassName("detail-footer-icon");
@@ -318,13 +260,14 @@ function rightBarEvent() {
     cst.addEventListener("change", function () {
         let rightBar = document.getElementById("right-bar");
         let taskid = rightBar.getAttribute("data-taskid");
-        createSubTask({task_id: taskid, title: this.value})
+        let subTask = {task_id: taskid, title: this.value}
+        DoRequest(POST, "/sub_task", subTask, false, verifyStatus);
+        DoRequest(GET, `/sub_task/${taskid}`, null, true, callbackShowSubTaskOnPage);
+        clearCreateSubTask();
     })
 
     autoResize(document.getElementById("right-bar"));
 }
-
-
 
 function autoResize(root) {
     let es = root.getElementsByClassName("edit");
@@ -342,33 +285,17 @@ function createTaskEvent() {
     createEdit.addEventListener("change", function () {
         let startTime = new Date();
         let deadline = new Date(startTime.getTime() + 86400000);
-        createTask({
+        let task = {
             completed: 'false',
             title: this.value,
             detail: "",
             type: "未分类",
             start_time: getLocalTimeString(startTime),
             deadline: getLocalTimeString(deadline),
-        });
+        }
+        DoRequest("post", "/task", task, true, verifyStatus);
     });
 }
-
-function createTask(task) {
-    console.log("create task" + JSON.stringify(task));
-    let x = new XMLHttpRequest();
-    x.onreadystatechange = function () {
-        if (x.readyState === 4 && x.status === 201) {
-            console.log("create task success");
-            showTaskList();
-        } else {
-            console.log("create task failed: " + x.responseText);
-        }
-    };
-    x.open("POST", "/task");
-    x.send(JSON.stringify(task));
-}
-
-
 
 function getLocalTimeString(utc) {
     let local = new Date(utc.getTime() - timezoneOffset).toISOString();
@@ -377,28 +304,17 @@ function getLocalTimeString(utc) {
     return local;
 }
 
-function deleteTask(id) {
-    console.log("delete task " + id);
-    let x = new XMLHttpRequest();
-    x.onreadystatechange = function () {
-        if (x.readyState === 4 && x.status === 200) {
-            console.log("delete task success");
-            showTaskList();
-        } else {
-            console.log("delete task failed: " + x.responseText);
-        }
-    };
-    x.open("DELETE", "/task/" + id);
-    x.send();
-}
-
 function deleteTaskEvent() {
     let dlt = document.getElementById("delete");
     dlt.addEventListener("click", function () {
         let rightBar = document.getElementById("right-bar");
         let id = rightBar.getAttribute("data-taskid");
-        deleteTask(id);
+        DoRequest("delete", `/task/${id}`, null, true, verifyStatus);
     });
+}
+
+function listAllTask() {
+    DoRequest(GET, "/tasks", null, true, callbackCreateTaskList)
 }
 
 let o = {
@@ -413,7 +329,7 @@ let o = {
 let leftBarElement = Object.create(o);
 leftBarElement.addEvent = leftBarEvent;
 let taskListElement = Object.create(o);
-taskListElement.show = showTaskList;
+taskListElement.show = listAllTask;
 let rightBarElement = Object.create(o);
 rightBarElement.addEvent = rightBarEvent;
 let createTaskElement = Object.create(o);
