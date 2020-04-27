@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -34,13 +35,25 @@ func ListTask(c *gin.Context) {
 
 func GetTask(c *gin.Context) {
 	id := c.Param("id")
-	task, err := model.GetTask(id)
+	tasks, err := model.GetTask(id)
 	if err != nil {
 		log.Errorf("get task %s failed: %v", id, err)
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, task)
+	if len(tasks) == 0 {
+		msg := fmt.Sprintf("task %s does not exist", id)
+		log.Error(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+	if len(tasks) > 1 {
+		msg := fmt.Sprintf("more than one task with id %s", id)
+		log.Error(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+	c.JSON(http.StatusOK, tasks[0])
 }
 
 func UpdateTask(c *gin.Context) {
@@ -137,4 +150,15 @@ func ListSubTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, subTasks)
+}
+
+func DeleteSubTask(c *gin.Context) {
+	id := c.Param("id")
+	err := model.DeleteSubTask(id)
+	if err != nil {
+		log.Errorf("delete sub task %s failed: %v", id, err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.Status(http.StatusOK)
 }
