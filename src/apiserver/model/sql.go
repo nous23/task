@@ -8,16 +8,69 @@ import (
 	"task/util"
 )
 
-func init() {
-	sqlBuilders = map[sqlBuilderEnum]*sqlBuilder{
-		sqlBuilderListTask:   newSqlBuilder(sqlBuilderListTask),
-		sqlBuilderGetTask:    newSqlBuilder(sqlBuilderGetTask),
-		sqlBuilderUpdateTask: newSqlBuilder(sqlBuilderUpdateTask),
-		sqlBuilderDeleteTask: newSqlBuilder(sqlBuilderDeleteTask),
-		sqlBuilderCreateTask: newSqlBuilder(sqlBuilderCreateTask),
-		sqlBuilderCreateSubTask: newSqlBuilder(sqlBuilderCreateSubTask),
-		sqlBuilderListSubTask: newSqlBuilder(sqlBuilderListSubTask),
-	}
+type sqlBuilderEnum int
+
+// operation enum
+const (
+	listTask sqlBuilderEnum = iota
+	getTask
+	updateTask
+	deleteTask
+	createTask
+	createSubTask
+	listSubTask
+	deleteSubTask
+)
+
+var sqlTemplate = map[sqlBuilderEnum]string{
+	listTask: `select * from task;`,
+	getTask:  `select * from task where id={{.id}};`,
+	updateTask: `update task set
+{{ if hasKey . "title" }}
+title = '{{.title}},'
+{{ end }}
+{{ if hasKey . "completed" }}
+completed = {{.completed}},
+{{end}}
+{{if hasKey . "type"}}
+task_type = '{{.type}}',
+{{end}}
+{{if hasKey . "detail"}}
+detail = '{{.detail}}',
+{{end}}
+{{if hasKey . "start_time"}}
+start_time = '{{.start_time}}',
+{{end}}
+{{if hasKey . "end_time"}}
+end_time = '{{.end_time}}',
+{{end}}
+{{if hasKey . "deadline"}}
+deadline = '{{.deadline}}',
+{{end}}
+where id = {{.id}};`,
+	deleteTask: `delete from task where id={{.id}};`,
+	createTask: `insert into task (completed, title, task_type, detail, start_time, deadline) values
+({{.completed}}, '{{.title}}', '{{.type}}', '{{.detail}}', '{{.start_time}}', '{{.deadline}}');`,
+	createSubTask: `insert into subtask (task_id, title) values ({{.task_id}}, '{{.title}}');`,
+	listSubTask:   `select * from subtask where task_id={{.task_id}} order by id;`,
+	deleteSubTask: `delete from subtask where id={{.id}};`,
+}
+
+var hooks = map[sqlBuilderEnum]func(string) string{
+	updateTask: func(sql string) string {
+		return util.DeleteLast(sql, ",")
+	},
+}
+
+var sqlBuilders = map[sqlBuilderEnum]*sqlBuilder{
+	listTask:      newSqlBuilder(listTask),
+	getTask:       newSqlBuilder(getTask),
+	updateTask:    newSqlBuilder(updateTask),
+	deleteTask:    newSqlBuilder(deleteTask),
+	createTask:    newSqlBuilder(createTask),
+	createSubTask: newSqlBuilder(createSubTask),
+	listSubTask:   newSqlBuilder(listSubTask),
+	deleteSubTask: newSqlBuilder(deleteSubTask),
 }
 
 type params map[string]interface{}
@@ -52,76 +105,11 @@ func (b *sqlBuilder) build(p params) (string, error) {
 	return buffer.String(), nil
 }
 
-type sqlBuilderEnum int
-
-const (
-	sqlBuilderListTask sqlBuilderEnum = iota
-	sqlBuilderGetTask
-	sqlBuilderUpdateTask
-	sqlBuilderDeleteTask
-	sqlBuilderCreateTask
-	sqlBuilderCreateSubTask
-	sqlBuilderListSubTask
-)
-
-const (
-	sqlTmplListTask   = `select * from task;`
-	sqlTmplGetTask    = `select * from task where id={{.id}};`
-	sqlTmplUpdateTask = `update task set
-{{ if hasKey . "title" }}
-title = '{{.title}},'
-{{ end }}
-{{ if hasKey . "completed" }}
-completed = {{.completed}},
-{{end}}
-{{if hasKey . "type"}}
-task_type = '{{.type}}',
-{{end}}
-{{if hasKey . "detail"}}
-detail = '{{.detail}}',
-{{end}}
-{{if hasKey . "start_time"}}
-start_time = '{{.start_time}}',
-{{end}}
-{{if hasKey . "end_time"}}
-end_time = '{{.end_time}}',
-{{end}}
-{{if hasKey . "deadline"}}
-deadline = '{{.deadline}}',
-{{end}}
-where id = {{.id}};`
-	sqlTmplDeleteTask = `delete from task where id={{.id}};`
-	sqlTmplCreateTask = `insert into task (completed, title, task_type, detail, start_time, deadline) values
-({{.completed}}, '{{.title}}', '{{.type}}', '{{.detail}}', '{{.start_time}}', '{{.deadline}}');`
-	sqlTmplCreateSubTask = `insert into subtask (task_id, title) values ({{.task_id}}, '{{.title}}');`
-	sqlTmplListSubTask = `select * from subtask where task_id={{.task_id}} order by id;`
-)
-
-var sqlBuilders map[sqlBuilderEnum]*sqlBuilder
-
-func newSqlBuilder(be sqlBuilderEnum) *sqlBuilder {
-	var tmpl string
-	var hook func(sql string) string
-	switch be {
-	case sqlBuilderListTask:
-		tmpl = sqlTmplListTask
-	case sqlBuilderGetTask:
-		tmpl = sqlTmplGetTask
-	case sqlBuilderUpdateTask:
-		tmpl = sqlTmplUpdateTask
-		hook = func(sql string) string {
-			return util.DeleteLast(sql, ",")
-		}
-	case sqlBuilderDeleteTask:
-		tmpl = sqlTmplDeleteTask
-	case sqlBuilderCreateTask:
-		tmpl = sqlTmplCreateTask
-	case sqlBuilderCreateSubTask:
-		tmpl = sqlTmplCreateSubTask
-	case sqlBuilderListSubTask:
-		tmpl = sqlTmplListSubTask
-	default:
-		return nil
+func newSqlBuilder(e sqlBuilderEnum) *sqlBuilder {
+	tmpl := sqlTemplate[e]
+	hook, ok := hooks[e]
+	if !ok {
+		hook = nil
 	}
 	return &sqlBuilder{
 		tmpl: tmpl,
