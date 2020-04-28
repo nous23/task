@@ -20,6 +20,7 @@ const (
 	createSubTask
 	listSubTask
 	deleteSubTask
+	updateSubTask
 )
 
 var sqlTemplate = map[sqlBuilderEnum]string{
@@ -54,10 +55,21 @@ where id = {{.id}};`,
 	createSubTask: `insert into subtask (task_id, title) values ({{.task_id}}, '{{.title}}');`,
 	listSubTask:   `select * from subtask where task_id={{.task_id}} order by id;`,
 	deleteSubTask: `delete from subtask where id={{.id}};`,
+	updateSubTask: `update subtask set
+{{if hasKey . "title"}}
+title='{{.title}}',
+{{end}}
+{{if hasKey . "completed"}}
+completed={{.completed}},
+{{end}}
+where id={{.id}};`,
 }
 
 var hooks = map[sqlBuilderEnum]func(string) string{
 	updateTask: func(sql string) string {
+		return util.DeleteLast(sql, ",")
+	},
+	updateSubTask: func(sql string) string {
 		return util.DeleteLast(sql, ",")
 	},
 }
@@ -71,9 +83,10 @@ var sqlBuilders = map[sqlBuilderEnum]*sqlBuilder{
 	createSubTask: newSqlBuilder(createSubTask),
 	listSubTask:   newSqlBuilder(listSubTask),
 	deleteSubTask: newSqlBuilder(deleteSubTask),
+	updateSubTask: newSqlBuilder(updateSubTask),
 }
 
-type params map[string]interface{}
+type Params map[string]interface{}
 
 const (
 	errorSqlBuilderNotFound string = "can not find sql builder"
@@ -84,7 +97,7 @@ type sqlBuilder struct {
 	hook func(string) string
 }
 
-func (b *sqlBuilder) build(p params) (string, error) {
+func (b *sqlBuilder) build(p Params) (string, error) {
 	if p == nil {
 		return b.tmpl, nil
 	}
@@ -117,7 +130,7 @@ func newSqlBuilder(e sqlBuilderEnum) *sqlBuilder {
 	}
 }
 
-func buildSql(e sqlBuilderEnum, p params) (string, error) {
+func buildSql(e sqlBuilderEnum, p Params) (string, error) {
 	sb, ok := sqlBuilders[e]
 	if !ok {
 		return "", fmt.Errorf(errorSqlBuilderNotFound)
