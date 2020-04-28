@@ -27,7 +27,7 @@ func logger(c *gin.Context) {
 
 func Run() error {
 	r := gin.New()
-	r.Use(logger)
+	//r.Use(logger)
 	r.Use(gin.Recovery())
 
 	r.LoadHTMLFiles(global.TaskHTMLPath)
@@ -47,6 +47,7 @@ func Run() error {
 	r.POST("/sub_task", controller.CreateSubTask)
 	r.GET("/sub_task/:task_id", controller.ListSubTask)
 	r.DELETE("/sub_task/:id", controller.DeleteSubTask)
+	r.PUT("/sub_task/:id", controller.UpdateSubTask)
 
 	err := r.Run()
 	if err != nil {
