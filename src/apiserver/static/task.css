@@ -291,7 +291,7 @@ textarea {
     font-weight: 900;
 }
 
-.sub-tasks .complete label::before {
+.sub-task-item .complete label::before {
     font-size: small;
     padding: 0 10px 0 10px;
 }
@@ -338,11 +338,11 @@ textarea {
 }
 
 #create-task-edit {
-    /*padding-left: ;*/
     outline: none;
     border: none;
     resize: none;
     font-size: 15px;
+    width: 100%;
 }
 
 .no-margin-bottom {
@@ -359,11 +359,12 @@ textarea {
 }
 
 .title-item {
-    padding-bottom: 10px;
+    padding: 10px 0;
 }
 
 .sub-task-item {
-    padding-bottom: 5px;
+    padding-bottom: 0;
+    height: 36px;
 }
 
 .del-sub-task {
@@ -375,4 +376,8 @@ textarea {
 
 .del-sub-task i {
     cursor: pointer;
+}
+
+.create-sub-task-icon {
+    font-size: smaller;
 }
