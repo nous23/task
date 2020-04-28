@@ -42,7 +42,7 @@ function taskListEvent() {
             }
             this.classList.add(LeftBarOptionActive);
             let id = this.id.split("-")[1];
-            DoRequest("get", "/task/" + id, null, true, callbackShowRightBar);
+            DoRequest(GET, "/task/" + id, null, true, callbackShowRightBar);
         });
 
         e.addEventListener("mouseover", function () {
@@ -56,20 +56,12 @@ function taskListEvent() {
         let input = document.getElementById(completeId);
         let taskid = e.id.split("-")[1];
         input.addEventListener("change", function () {
-            let update;
-            if (input.checked) {
-                let utc = new Date();
-                let local = new Date(utc.getTime() - timezoneOffset).toISOString();
-                update = {completed: "1", end_time: local.split(".")[0]};
-            } else {
-                update = {completed: "0"};
-            }
-            DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
+            updateTaskCompleted(input.checked, taskid);
         });
     }
 }
 
-function callbackCreateTaskList() {
+function callbackShowTaskList() {
     if (this.status !== 200) {
         console.error(`create task failed: ${this.responseText}`)
         return
@@ -125,17 +117,6 @@ function callbackCreateTaskList() {
     taskListEvent();
 }
 
-function updateTaskTitleOnPage(id, title) {
-    let task = document.getElementById("taskid-" + id);
-    if (task == null) {
-        return;
-    }
-    let es = task.getElementsByClassName("title");
-    for (let i = 0; i < es.length; i++) {
-        es[i].innerHTML = title;
-    }
-}
-
 function callbackShowRightBar() {
     if (this.status !== 200) {
         console.error("get task failed: " + this.responseText);
@@ -146,6 +127,8 @@ function callbackShowRightBar() {
     if (titleEdit != null) {
         titleEdit.value = task.title;
     }
+    let tc = document.getElementById("task-complete");
+    tc.checked = task.completed;
 
     let contentEdit = document.getElementById("content-edit");
     contentEdit.value = task.detail;
@@ -212,7 +195,7 @@ function rightBarEvent() {
             let rightBar = document.getElementById("right-bar");
             let taskid = rightBar.getAttribute("data-taskid");
             let update = {title: this.value};
-            DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
+            DoRequest(PUT, `/task/${taskid}`, update, true, callbackVerifyStatus);
         });
     }
 
@@ -221,7 +204,7 @@ function rightBarEvent() {
         let rightBar = document.getElementById("right-bar");
         let taskid = rightBar.getAttribute("data-taskid");
         let update = {detail: this.value};
-        DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
+        DoRequest(PUT, `/task/${taskid}`, update, true, callbackVerifyStatus);
     });
 
     let deadline = document.getElementById("input-date");
@@ -229,7 +212,7 @@ function rightBarEvent() {
         let rightBar = document.getElementById("right-bar");
         let taskid = rightBar.getAttribute("data-taskid");
         let update = {deadline: this.value};
-        DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
+        DoRequest(PUT, `/task/${taskid}`, update, true, callbackVerifyStatus);
     });
 
     let taskTypeEdit = document.getElementById("task-type");
@@ -237,7 +220,7 @@ function rightBarEvent() {
         let rightBar = document.getElementById("right-bar");
         let taskid = rightBar.getAttribute("data-taskid");
         let update = {type: this.value};
-        DoRequest(PUT, `/task/${taskid}`, update, true, verifyStatus);
+        DoRequest(PUT, `/task/${taskid}`, update, true, callbackVerifyStatus);
     });
 
     let footerIcons = document.getElementsByClassName("detail-footer-icon");
@@ -251,19 +234,23 @@ function rightBarEvent() {
     }
 
     let hide = document.getElementById("hide");
-    hide.addEventListener("click", function () {
-        let rightBar = document.getElementById("right-bar");
-        rightBar.classList.add("not-show");
-    });
+    hide.addEventListener("click", hideRightBar);
 
     let cst = document.getElementById("create-sub-task");
     cst.addEventListener("change", function () {
         let rightBar = document.getElementById("right-bar");
         let taskid = rightBar.getAttribute("data-taskid");
         let subTask = {task_id: taskid, title: this.value}
-        DoRequest(POST, "/sub_task", subTask, false, verifyStatus);
+        DoRequest(POST, "/sub_task", subTask, false, callbackVerifyStatus);
         DoRequest(GET, `/sub_task/${taskid}`, null, true, callbackShowSubTaskOnPage);
         clearCreateSubTask();
+    })
+
+    let tc = document.getElementById("task-complete");
+    tc.addEventListener("change", function () {
+        let taskId = getRightBarTaskId();
+        updateTaskCompleted(this.checked, taskId);
+        DoRequest(GET, "/tasks", null, true, callbackShowTaskList)
     })
 
     autoResize(document.getElementById("right-bar"));
@@ -293,7 +280,8 @@ function createTaskEvent() {
             start_time: getLocalTimeString(startTime),
             deadline: getLocalTimeString(deadline),
         }
-        DoRequest("post", "/task", task, true, verifyStatus);
+        DoRequest(POST, "/task", task, false, callbackVerifyStatus);
+        DoRequest(GET, "/tasks", null, true, callbackShowTaskList)
     });
 }
 
@@ -309,12 +297,14 @@ function deleteTaskEvent() {
     dlt.addEventListener("click", function () {
         let rightBar = document.getElementById("right-bar");
         let id = rightBar.getAttribute("data-taskid");
-        DoRequest("delete", `/task/${id}`, null, true, verifyStatus);
+        DoRequest(DELETE, `/task/${id}`, null, false, callbackVerifyStatus);
+        DoRequest(GET, `/tasks`, null, true, callbackShowTaskList);
+        hideRightBar();
     });
 }
 
 function listAllTask() {
-    DoRequest(GET, "/tasks", null, true, callbackCreateTaskList)
+    DoRequest(GET, "/tasks", null, true, callbackShowTaskList)
 }
 
 let o = {
