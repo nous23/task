@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	log "github.com/sirupsen/logrus"
 
 	"task/database"
@@ -44,7 +46,7 @@ func ListTask() ([]*Task, error) {
 
 func GetTask(id string) ([]*Task, error) {
 	log.Tracef("start get task %s", id)
-	sqlCmd, err := buildSql(getTask, params{"id": id})
+	sqlCmd, err := buildSql(getTask, Params{"id": id})
 	if err != nil {
 		log.Errorf("build get task sql failed: %v", err)
 		return nil, err
@@ -84,7 +86,7 @@ func UpdateTask(value map[string]interface{}) error {
 
 func DeleteTask(id string) error {
 	log.Tracef("start delete task %s", id)
-	sqlCmd, err := buildSql(deleteTask, params{"id": id})
+	sqlCmd, err := buildSql(deleteTask, Params{"id": id})
 	if err != nil {
 		log.Errorf("build sql for delete task failed: %v", err)
 		return err
@@ -97,7 +99,7 @@ func DeleteTask(id string) error {
 	return nil
 }
 
-func CreateTask(p params) error {
+func CreateTask(p Params) error {
 	log.Tracef("start create task: %v", p)
 	sqlCmd, err := buildSql(createTask, p)
 	if err != nil {
@@ -112,7 +114,7 @@ func CreateTask(p params) error {
 	return nil
 }
 
-func CreateSubTask(p params) error {
+func CreateSubTask(p Params) error {
 	log.Tracef("start create sub task: %v", p)
 	sqlCmd, err := buildSql(createSubTask, p)
 	if err != nil {
@@ -136,7 +138,7 @@ type SubTask struct {
 
 func ListSubTask(taskId string) ([]*SubTask, error) {
 	log.Trace("start list sub task")
-	sqlCmd, err := buildSql(listSubTask, params{"task_id": taskId})
+	sqlCmd, err := buildSql(listSubTask, Params{"task_id": taskId})
 	if err != nil {
 		log.Errorf("build list sub task sql failed: %v", err)
 		return nil, err
@@ -161,7 +163,7 @@ func ListSubTask(taskId string) ([]*SubTask, error) {
 
 func DeleteSubTask(id string) error {
 	log.Tracef("start delete sub task %s", id)
-	sqlCmd, err := buildSql(deleteSubTask, params{"id": id})
+	sqlCmd, err := buildSql(deleteSubTask, Params{"id": id})
 	if err != nil {
 		log.Errorf("build sql for delete sub task failed: %v", err)
 		return err
@@ -172,5 +174,26 @@ func DeleteSubTask(id string) error {
 		return err
 	}
 	log.Tracef("exec [%s] success", sqlCmd)
+	return nil
+}
+
+func UpdateSubTask(p Params) error {
+	id, ok := p["id"]
+	if !ok {
+		msg := fmt.Sprintf("sub task id not specified: %v", p)
+		log.Error(msg)
+		return fmt.Errorf(msg)
+	}
+	log.Tracef("start update sub task %s", id)
+	sqlCmd, err := buildSql(updateSubTask, p)
+	if err != nil {
+		log.Errorf("build sql for update sub task failed: %v", err)
+		return err
+	}
+	_, err = database.Get().Exec(sqlCmd)
+	if err != nil {
+		log.Errorf("exec sql [%s] failed: %v", sqlCmd, err)
+		return err
+	}
 	return nil
 }
