@@ -19,7 +19,7 @@ function DoRequest(method, url, body, async, callback) {
     }
 }
 
-function verifyStatus() {
+function callbackVerifyStatus() {
     let okCode;
     switch (this.method) {
         case POST:
