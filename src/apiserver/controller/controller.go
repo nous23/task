@@ -6,12 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
-
 	"task/apiserver/model"
 	"task/global"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 func Hello(c *gin.Context) {
@@ -157,6 +156,29 @@ func DeleteSubTask(c *gin.Context) {
 	err := model.DeleteSubTask(id)
 	if err != nil {
 		log.Errorf("delete sub task %s failed: %v", id, err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
+func UpdateSubTask(c *gin.Context) {
+	b, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Errorf("read update sub task request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	p := model.Params{}
+	err = json.Unmarshal(b, &p)
+	if err != nil {
+		log.Errorf("unmarshal update sub task request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	err = model.UpdateSubTask(p)
+	if err != nil {
+		log.Errorf("update sub task failed: %v", err)
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
