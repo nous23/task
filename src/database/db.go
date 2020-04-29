@@ -12,7 +12,7 @@ import (
 
 var db *sql.DB
 
-func InitDB() error {
+func initDB() error {
 	dataSourceName := fmt.Sprintf("%s:%s@%s(%s:%d)/%s",
 		config.AppConfigs.DBConfig.User,
 		config.AppConfigs.DBConfig.Password,
@@ -32,4 +32,11 @@ func InitDB() error {
 // return database handler
 func Get() *sql.DB {
 	return db
+}
+
+func init() {
+	err := initDB()
+	if err != nil {
+		log.Panicf("init database failed: %v", err)
+	}
 }
