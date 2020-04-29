@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"text/template"
 
+	log "github.com/sirupsen/logrus"
+
+	"task/database"
 	"task/util"
 )
 
@@ -140,4 +143,33 @@ func buildSql(e sqlBuilderEnum, p Params) (string, error) {
 		return "", err
 	}
 	return sqlCmd, nil
+}
+
+const (
+	createTaskSql = `create table if not exists task (
+id int primary key auto_increment not null,
+completed bool default false not null,
+title varchar(256) default 'untitled' not null,
+task_type varchar(32) default 'unknown' not null,
+detail varchar(1024) default 'no detail' not null,
+start_time datetime default current_timestamp not null,
+end_time datetime default current_timestamp not null,
+deadline datetime default current_timestamp not null
+);`
+	createSubTaskSql = `create table if not exists subtask (
+id int primary key not null auto_increment,
+task_id int not null,
+index task_id_index (task_id),
+title varchar(256) default 'untitled' not null,
+foreign key (task_id) references task(id) on delete cascade on update cascade);`
+)
+
+func init() {
+	createSqls := []string{createTaskSql, createSubTaskSql}
+	for _, sqlCmd := range createSqls {
+		_, err := database.Get().Exec(sqlCmd)
+		if err != nil {
+			log.Panicf("exec sql [%s] failed: %v", sqlCmd, err)
+		}
+	}
 }
