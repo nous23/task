@@ -184,3 +184,67 @@ func UpdateSubTask(c *gin.Context) {
 	}
 	c.Status(http.StatusOK)
 }
+
+func LoginPage(c *gin.Context) {
+	c.HTML(http.StatusOK, global.LoginHTMLFile, nil)
+}
+
+func Register(c *gin.Context) {
+	b, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Errorf("read register request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	p := model.Params{}
+	err = json.Unmarshal(b, &p)
+	if err != nil {
+		log.Errorf("unmarshal update sub task request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	err = model.Register(p)
+	if err != nil {
+		log.Errorf("register failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.HTML(http.StatusCreated, global.TaskHTMLFile, nil)
+}
+
+func Login(c *gin.Context) {
+	b, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Errorf("read login request body failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	log.Infof("=== %s", string(b))
+	p := make(map[string]string)
+	err = json.Unmarshal(b, &p)
+	log.Infof("=== %+v", p)
+	username := p["username"]
+	password := p["password"]
+	users, err := model.GetUserByName(username)
+	if err != nil {
+		log.Errorf("get user by name failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(users) == 0 {
+		msg := "用户不存在"
+		c.String(http.StatusInternalServerError, msg)
+		return
+	} else if len(users) > 1 {
+		msg := "用户重复"
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
+	if password != users[0].Password {
+		msg := "密码不正确"
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+	c.String(http.StatusOK, "login success")
+}

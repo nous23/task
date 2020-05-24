@@ -20,6 +20,7 @@ func init() {
 
 	AppConfigPath = filepath.Join(ConfDir, AppConfigFile)
 	TaskHTMLPath = filepath.Join(StaticDir, TaskHTMLFile)
+	LoginHTMLPath = filepath.Join(StaticDir, LoginHTMLFile)
 }
 
 // dirs
@@ -35,9 +36,11 @@ var (
 var (
 	AppConfigPath string
 	TaskHTMLPath  string
+	LoginHTMLPath string
 )
 
 const (
 	AppConfigFile string = "app_config.yaml"
 	TaskHTMLFile  string = "task.html"
+	LoginHTMLFile string = "login.html"
 )

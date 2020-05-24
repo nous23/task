@@ -31,9 +31,14 @@ func Run() error {
 	r.Use(gin.Recovery())
 
 	r.LoadHTMLFiles(global.TaskHTMLPath)
+	r.LoadHTMLFiles(global.LoginHTMLPath)
 	r.Static("/static", global.StaticDir)
 
 	r.GET("/", controller.Hello)
+
+	r.GET("/home", controller.LoginPage)
+	r.POST("/register", controller.Register)
+	r.GET("/login", controller.Login)
 
 	// task
 	r.GET("/task", controller.Task)

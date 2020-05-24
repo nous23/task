@@ -24,6 +24,8 @@ const (
 	listSubTask
 	deleteSubTask
 	updateSubTask
+	register
+	getUserByName
 )
 
 var sqlTemplate = map[sqlBuilderEnum]string{
@@ -66,6 +68,8 @@ title='{{.title}}',
 completed={{.completed}},
 {{end}}
 where id={{.id}};`,
+	register: `insert into users (user_name, user_password) values ('{{.username}}', '{{.password}}');`,
+	getUserByName: `select * from users where user_name='{{.username}}';`,
 }
 
 var hooks = map[sqlBuilderEnum]func(string) string{
@@ -87,6 +91,8 @@ var sqlBuilders = map[sqlBuilderEnum]*sqlBuilder{
 	listSubTask:   newSqlBuilder(listSubTask),
 	deleteSubTask: newSqlBuilder(deleteSubTask),
 	updateSubTask: newSqlBuilder(updateSubTask),
+	register:      newSqlBuilder(register),
+	getUserByName: newSqlBuilder(getUserByName),
 }
 
 type Params map[string]interface{}
@@ -163,10 +169,15 @@ index task_id_index (task_id),
 title varchar(256) default 'untitled' not null,
 completed bool default false not null,
 foreign key (task_id) references task(id) on delete cascade on update cascade);`
+	createUsersSql = `create table if not exists users (
+id int primary key auto_increment,
+user_name varchar(32) not null default '',
+user_password varchar(64) not null
+);`
 )
 
 func init() {
-	createSqls := []string{createTaskSql, createSubTaskSql}
+	createSqls := []string{createTaskSql, createSubTaskSql, createUsersSql}
 	for _, sqlCmd := range createSqls {
 		_, err := database.Get().Exec(sqlCmd)
 		if err != nil {

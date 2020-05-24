@@ -31,4 +31,5 @@ function callbackVerifyStatus() {
     if (this.status !== okCode) {
         console.error(`request ${this.method}:${this.url} failed, status: ${this.status}, response: ${this.responseText}`);
     }
+    console.log(this.responseText);
 }

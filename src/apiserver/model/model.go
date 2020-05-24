@@ -197,3 +197,52 @@ func UpdateSubTask(p Params) error {
 	}
 	return nil
 }
+
+func Register(p Params) error {
+	log.Tracef("start register user: ", p["username"])
+	sqlCmd, err := buildSql(register, p)
+	if err != nil {
+		log.Errorf("build sql for register failed: %v", err)
+		return err
+	}
+	_, err = database.Get().Exec(sqlCmd)
+	if err != nil {
+		log.Errorf("exec sql [%s] failed: %v", sqlCmd, err)
+		return err
+	}
+	return nil
+}
+
+type User struct {
+	Id int
+	Name string
+	Password string
+}
+
+func GetUserByName(username string) ([]*User, error) {
+	log.Tracef("start get user by name: %s", username)
+	p := Params{
+		"username": username,
+	}
+	sqlCmd, err := buildSql(getUserByName, p)
+	if err != nil {
+		log.Errorf("build sql for get user by name failed: %v", err)
+		return nil, err
+	}
+	rows, err := database.Get().Query(sqlCmd)
+	if err != nil {
+		log.Errorf("exec sql [%s] failed: %v", sqlCmd, err)
+		return nil, err
+	}
+	var users []*User
+	for rows.Next() {
+		u := &User{}
+		err = rows.Scan(&u.Id, &u.Name, &u.Password)
+		if err != nil {
+			log.Errorf("scan get user by name query results failed: %v", err)
+			return nil, err
+		}
+		users = append(users, u)
+	}
+	return users, nil
+}
