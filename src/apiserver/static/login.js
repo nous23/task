@@ -25,7 +25,8 @@ function buttonEvent() {
             username: username,
             password: password
         };
-        DoRequest(POST, "/register", r, true, callbackVerifyStatus)
+        console.log(JSON.stringify(r))
+        DoRequest(POST, "/register", r, true, confirmRegisterCallback)
     })
 
     e = document.getElementById("login");
@@ -37,8 +38,25 @@ function buttonEvent() {
             password: password
         };
         console.log(JSON.stringify(l));
-        DoRequest(GET, "/login", l, true, callbackVerifyStatus)
+        DoRequest(POST, "/login", l, true, redirect)
     })
+}
+
+function confirmRegisterCallback() {
+    if (this.status !== 201) {
+        alert(this.responseText);
+    } else {
+        window.location.assign("http://127.0.0.1:8080/");
+    }
+}
+
+function redirect() {
+    if (this.status === 201) {
+        console.log("login success");
+        window.location.assign("http://127.0.0.1:8080/task");
+    } else {
+        alert(this.responseText);
+    }
 }
 
 buttonEvent();
