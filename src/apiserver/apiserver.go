@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -30,15 +31,14 @@ func Run() error {
 	//r.Use(logger)
 	r.Use(gin.Recovery())
 
-	r.LoadHTMLFiles(global.TaskHTMLPath)
-	r.LoadHTMLFiles(global.LoginHTMLPath)
+	//r.LoadHTMLFiles(global.TaskHTMLPath)
+	//r.LoadHTMLFiles(global.LoginHTMLPath)
+	r.LoadHTMLGlob(filepath.Join(global.StaticDir, "*.html"))
 	r.Static("/static", global.StaticDir)
 
-	r.GET("/", controller.Hello)
-
-	r.GET("/home", controller.LoginPage)
+	r.GET("/", controller.LoginPage)
 	r.POST("/register", controller.Register)
-	r.GET("/login", controller.Login)
+	r.POST("/login", controller.Login)
 
 	// task
 	r.GET("/task", controller.Task)
