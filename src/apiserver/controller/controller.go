@@ -203,6 +203,17 @@ func Register(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
+	users, err := model.GetUserByName(p["username"].(string))
+	if err != nil {
+		log.Errorf("get user by name failed: %v", err)
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	if len(users) > 0 {
+		msg := "用户已存在"
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
 	err = model.Register(p)
 	if err != nil {
 		log.Errorf("register failed: %v", err)
@@ -219,10 +230,9 @@ func Login(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Infof("=== %s", string(b))
+	log.Tracef("login message: %s", string(b))
 	p := make(map[string]string)
 	err = json.Unmarshal(b, &p)
-	log.Infof("=== %+v", p)
 	username := p["username"]
 	password := p["password"]
 	users, err := model.GetUserByName(username)
@@ -246,5 +256,5 @@ func Login(c *gin.Context) {
 		c.String(http.StatusInternalServerError, msg)
 		return
 	}
-	c.String(http.StatusOK, "login success")
+	c.String(http.StatusCreated, "login success")
 }
