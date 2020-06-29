@@ -63,7 +63,7 @@ function taskListEvent() {
 
 function callbackShowTaskList() {
     if (this.status !== 200) {
-        console.error(`create task failed: ${this.responseText}`)
+        console.error(`list task failed: ${this.responseText}`)
         return
     }
     let tasks = JSON.parse(this.responseText);
@@ -195,7 +195,7 @@ function rightBarEvent() {
             let rightBar = document.getElementById("right-bar");
             let taskid = rightBar.getAttribute("data-taskid");
             let update = {title: this.value};
-            DoRequest(PUT, `/task/${taskid}`, update, true, callbackVerifyStatus);
+            DoRequest(PUT, `/task/${taskid}`, update, true, listAllTask);
         });
     }
 
