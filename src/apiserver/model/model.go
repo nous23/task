@@ -19,9 +19,9 @@ type Task struct {
 	Deadline  string `json:"deadline"`
 }
 
-func ListTask() ([]*Task, error) {
+func ListTask(p Params) ([]*Task, error) {
 	log.Trace("start list task")
-	sqlCmd, err := buildSql(listTask, nil)
+	sqlCmd, err := buildSql(listTask, p)
 	if err != nil {
 		log.Errorf("build list task sql failed: %v", err)
 		return nil, err
