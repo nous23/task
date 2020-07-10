@@ -28,3 +28,7 @@ func HasKey(m map[string]interface{}, key string) bool {
 	}
 	return false
 }
+
+func IsEmpty(m map[string]interface{}) bool {
+	return len(m) == 0
+}
