@@ -6,7 +6,6 @@ const timezoneOffset = new Date().getTimezoneOffset() * 60000;
 
 
 function leftBarEvent() {
-
     let es = document.getElementsByClassName("left-bar-option");
     let i;
     for (i = 0; i < es.length; i++) {
@@ -195,7 +194,7 @@ function rightBarEvent() {
             let rightBar = document.getElementById("right-bar");
             let taskid = rightBar.getAttribute("data-taskid");
             let update = {title: this.value};
-            DoRequest(PUT, `/task/${taskid}`, update, true, listAllTask);
+            DoRequest(PUT, `/task/${taskid}`, update, true, listIncompleteTask);
         });
     }
 
@@ -307,6 +306,10 @@ function listAllTask() {
     DoRequest(GET, "/tasks", null, true, callbackShowTaskList)
 }
 
+function listIncompleteTask() {
+    DoRequest(GET, "/tasks?complete=false", null, true, callbackShowTaskList)
+}
+
 let o = {
     addEvent: function () {},
     show: function () {},
@@ -319,7 +322,7 @@ let o = {
 let leftBarElement = Object.create(o);
 leftBarElement.addEvent = leftBarEvent;
 let taskListElement = Object.create(o);
-taskListElement.show = listAllTask;
+taskListElement.show = listIncompleteTask;
 let rightBarElement = Object.create(o);
 rightBarElement.addEvent = rightBarEvent;
 let createTaskElement = Object.create(o);
