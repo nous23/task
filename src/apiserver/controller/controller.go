@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"task/apiserver/model"
 	"task/global"
@@ -22,7 +23,13 @@ func Task(c *gin.Context) {
 }
 
 func ListTask(c *gin.Context) {
-	tasks, err := model.ListTask()
+	params := c.Request.URL.Query()
+	// process multiple values to single fields
+	m := make(map[string]interface{})
+	for k, v := range params {
+		m[k] = strings.Join(v, "&")
+	}
+	tasks, err := model.ListTask(m)
 	if err != nil {
 		log.Errorf("list task failed: %v", err)
 		c.String(http.StatusInternalServerError, err.Error())
