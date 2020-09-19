@@ -29,8 +29,14 @@ const (
 )
 
 var sqlTemplate = map[sqlBuilderEnum]string{
-	listTask: `select * from task;`,
-	getTask:  `select * from task where id={{.id}};`,
+	listTask: `select * from task
+{{- if not (isEmpty .)}}
+where
+{{- if hasKey . "complete"}}
+completed = {{.complete}}
+{{- end}}
+{{- end}};`,
+	getTask: `select * from task where id={{.id}};`,
 	updateTask: `update task set
 {{ if hasKey . "title" }}
 title = '{{.title}},'
@@ -68,7 +74,7 @@ title='{{.title}}',
 completed={{.completed}},
 {{end}}
 where id={{.id}};`,
-	register: `insert into users (user_name, user_password) values ('{{.username}}', '{{.password}}');`,
+	register:      `insert into users (user_name, user_password) values ('{{.username}}', '{{.password}}');`,
 	getUserByName: `select * from users where user_name='{{.username}}';`,
 }
 
@@ -111,7 +117,8 @@ func (b *sqlBuilder) build(p Params) (string, error) {
 		return b.tmpl, nil
 	}
 	t, err := template.New("sql").Funcs(template.FuncMap{
-		"hasKey": util.HasKey,
+		"hasKey":  util.HasKey,
+		"isEmpty": util.IsEmpty,
 	}).Parse(b.tmpl)
 	if err != nil {
 		return "", err
