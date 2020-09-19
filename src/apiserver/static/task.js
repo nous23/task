@@ -249,7 +249,7 @@ function rightBarEvent() {
     tc.addEventListener("change", function () {
         let taskId = getRightBarTaskId();
         updateTaskCompleted(this.checked, taskId);
-        DoRequest(GET, "/tasks", null, true, callbackShowTaskList)
+        listIncompleteTask();
     })
 
     autoResize(document.getElementById("right-bar"));
@@ -280,7 +280,7 @@ function createTaskEvent() {
             deadline: getLocalTimeString(deadline),
         }
         DoRequest(POST, "/task", task, false, callbackVerifyStatus);
-        DoRequest(GET, "/tasks", null, true, callbackShowTaskList)
+        listIncompleteTask();
     });
 }
 
@@ -297,7 +297,7 @@ function deleteTaskEvent() {
         let rightBar = document.getElementById("right-bar");
         let id = rightBar.getAttribute("data-taskid");
         DoRequest(DELETE, `/task/${id}`, null, false, callbackVerifyStatus);
-        DoRequest(GET, `/tasks`, null, true, callbackShowTaskList);
+        listIncompleteTask();
         hideRightBar();
     });
 }
