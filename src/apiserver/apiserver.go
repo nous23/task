@@ -54,7 +54,7 @@ func Run() error {
 	r.DELETE("/sub_task/:id", controller.DeleteSubTask)
 	r.PUT("/sub_task/:id", controller.UpdateSubTask)
 
-	err := r.Run()
+	err := r.Run(":523")
 	if err != nil {
 		log.Errorf("run gin instance failed: %v", err)
 		return err
